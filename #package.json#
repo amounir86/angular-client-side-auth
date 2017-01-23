@@ -21,6 +21,10 @@
     "underscore": "1.8.3",
     "validator": "6.2.1"
   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/amounir86/angular-client-side-auth"
+  },
   "subdomain": "angular-client-side-auth",
   "scripts": {
     "start": "grunt dev",
@@ -28,8 +32,7 @@
     "postinstall": "bower install"
   },
   "engines": {
-    "npm": "4.1.1",
-    "node": "5.3.0"
+    "npm": "4.1.1"
   },
   "devDependencies": {
     "chai": "~1.9.1",

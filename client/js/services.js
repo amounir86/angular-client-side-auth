@@ -38,7 +38,21 @@ angular.module('angular-client-side-auth')
                 changeUser(user);
                 success(user);
             }).error(error);
+
+            firebase.auth().signInWithCustomToken(user.token).catch(function(error) {
+                // Handle Errors here.
+                var errorCode = error.code;
+                var errorMessage = error.message;
+            });
         },
+
+        addPost: function(user, success, error) {
+            $http.post('/addPost', user).success(function(user){
+                changeUser(user);
+                success(user);
+            }).error(error);
+        },
+
         logout: function(success, error) {
             $http.post('/logout').success(function(){
                 changeUser({
@@ -62,3 +76,21 @@ angular.module('angular-client-side-auth')
         }
     };
 });
+
+angular.module('angular-client-side-auth')
+.factory('Wods', function($http, $cookieStore){
+
+    var accessLevels = routingConfig.accessLevels
+            , userRoles = routingConfig.userRoles
+            , currentUser = $cookieStore.get('user') || { username: '', role: userRoles.public };
+
+    $cookieStore.remove('user');
+
+    return {
+        addPost: function(user, wod) {
+            $http.post('/addPost', user, wod).success(success).error(error);
+        }
+    };
+});
+
+

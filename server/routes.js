@@ -49,7 +49,9 @@ var routes = [
     {
         path: '/auth/google',
         httpMethod: 'GET',
-        middleware: [passport.authenticate('google')]
+        middleware: [passport.authenticate(
+            'google',
+            { scope: ['profile', 'email']})]
     },
     {
         path: '/auth/google/return',
@@ -88,6 +90,15 @@ var routes = [
         path: '/logout',
         httpMethod: 'POST',
         middleware: [AuthCtrl.logout]
+    },
+
+    // Posts
+    // All other get requests should be handled by AngularJS's client-side routing system
+    {
+        path: '/addPost',
+        httpMethod: 'POST',
+        middleware: [AuthCtrl.addPost],
+        accessLevel: accessLevels.user
     },
 
     // User resource

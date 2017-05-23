@@ -4,75 +4,110 @@ var User
     , LocalStrategy =   require('passport-local').Strategy
     , TwitterStrategy = require('passport-twitter').Strategy
     , FacebookStrategy = require('passport-facebook').Strategy
-    , GoogleStrategy = require('passport-google').Strategy
+    , GoogleStrategy = require('passport-google-oauth').OAuth2Strategy
     , LinkedInStrategy = require('passport-linkedin').Strategy
     , check =           require('validator').check
     , userRoles =       require('../../client/js/routingConfig').userRoles;
 
-var users = [
-    {
-        id:         1,
-        username:   "user",
-        password:   "123",
-        role:   userRoles.user
-    },
-    {
-        id:         2,
-        username:   "admin",
-        password:   "123",
-        role:   userRoles.admin
-    }
-];
+var firebase = require('firebase-admin');
+
+// TODO(DEVELOPER): Change the two placeholders below.
+// [START initialize]
+// Initialize the app with a service account, granting admin privileges
+var serviceAccount = require("/Users/amounir/Workspace/wod-bud1/angular-client-side-auth/wod-bud-firebase-adminsdk-hvyfn-ae973c6989.json");
+
+firebase.initializeApp({
+  credential: firebase.credential.cert(serviceAccount),
+  databaseURL: 'https://wod-bud.firebaseio.com'
+});
+// [END initialize]
+
+
 
 module.exports = {
-    addUser: function(username, password, role, callback) {
-        if(this.findByUsername(username) !== undefined)  return callback("UserAlreadyExists");
-
-        // Clean up when 500 users reached
-        if(users.length > 500) {
-            users = users.slice(0, 2);
-        }
-
+    addUser: function(username, password, role, email, callback) {
+        
         var user = {
-            id:         _.max(users, function(user) { return user.id; }).id + 1,
             username:   username,
+            email:      email,
             password:   password,
             role:       role
         };
-        users.push(user);
+
+        module.exports.addOrUpdateUserToDatabase(user);
+
         callback(null, user);
     },
 
-    findOrCreateOauthUser: function(provider, providerId) {
-        var user = module.exports.findByProviderId(provider, providerId);
-        if(!user) {
-            user = {
-                id: _.max(users, function(user) { return user.id; }).id + 1,
-                username: provider + '_user', // Should keep Oauth users anonymous on demo site
-                role: userRoles.user,
-                provider: provider
-            };
-            user[provider] = providerId;
-            users.push(user);
-        }
-
+    findOrCreateOauthUser: function(provider, providerId, displayName, email, accessToken) {
+        var user = {
+            username: displayName,
+            email:    email,
+            role: userRoles.user,
+            provider: provider,
+            accessToken: accessToken
+        };
+        module.exports.addOrUpdateUserToDatabase(user);
         return user;
     },
 
-    findAll: function() {
-        return _.map(users, function(user) { return _.clone(user); });
+    addOrUpdateUserToDatabase: function(user) {
+        existingUser = firebase.database().ref().child('users')
+        .orderByChild("username")
+        .equalTo(user.username)
+        .once ( 'value', function(existingUser)
+        {
+            if ( existingUser.val() == null )
+            {
+                // Get a key for a new User.
+                var newPostKey = firebase.database().ref().child('users').push().key;
+
+                // Write the new post's data simultaneously in the posts list and the user's post list.
+                var updates = {};
+                updates['/users/' + newPostKey] = user;
+
+                firebase.database().ref().update(updates);
+            }
+        })
     },
 
-    findById: function(id) {
-        return _.clone(_.find(users, function(user) { return user.id === id }));
+    findAll: function() {
+        return firebase.database().ref().child('users')
+        .orderByChild("username")
+        .on('value', function(existingUser)
+        {
+            return existingUser.val();
+        });
+    },
+
+    findByEmail: function(email) {
+        return firebase.database().ref().child('users')
+        .orderByChild("email")
+        .equalTo(email)
+        .once ( 'value', function(existingUser)
+        {
+            return existingUser.val();
+        });
     },
 
     findByUsername: function(username) {
-        return _.clone(_.find(users, function(user) { return user.username === username; }));
+        return firebase.database().ref().child('users')
+        .orderByChild("username")
+        .equalTo(username)
+        .once ( 'value', function(existingUser)
+        {
+            return existingUser.val();
+        });
     },
 
     findByProviderId: function(provider, id) {
-        return _.find(users, function(user) { return user[provider] === id; });
+        return firebase.database().ref().child('users')
+        .orderByChild("provider")
+        .equalTo(id)
+        .once ( 'value', function(existingUser)
+        {
+            return existingUser.val();
+        });
     },
 
     validate: function(user) {
@@ -135,16 +170,26 @@ module.exports = {
         });
     },
 
-    googleStrategy: function() {
+    googleStrategy: function()
+     {
 
-        return new GoogleStrategy({
-            returnURL: process.env.GOOGLE_RETURN_URL || "http://localhost:8000/auth/google/return",
-            realm: process.env.GOOGLE_REALM || "http://localhost:8000/"
-        },
-        function(identifier, profile, done) {
-            var user = module.exports.findOrCreateOauthUser('google', identifier);
-            done(null, user);
-        });
+        return new GoogleStrategy(
+            {
+                clientID: "666308033451-pb5cbttosgj7a1it8ards8mqna474ehl.apps.googleusercontent.com",
+                clientSecret: "eI0VbO7LqF7u5dznLCQcZhU9",
+                callbackURL: process.env.GOOGLE_RETURN_URL || "http://localhost:8000/auth/google/return"
+            },
+            function(accessToken, refreshToken, profile, done)
+            {
+                var user = module.exports.findOrCreateOauthUser(
+                    profile.provider,
+                    profile.id,
+                    profile.displayName,
+                    profile.emails[0].value,
+                    accessToken);
+                return done(null, user);
+            }
+        )
     },
 
     linkedInStrategy: function() {

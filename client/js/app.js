@@ -62,6 +62,11 @@ angular.module('angular-client-side-auth', ['ngCookies', 'ui.router'])
             url: '',
             templateUrl: 'private/home'
         })
+        .state('user.addPost', {
+            url: '/addPost',
+            templateUrl: 'home',
+            controller: 'addPostCtrl'
+        })
         .state('user.private.nested', {
             url: 'nested/',
             templateUrl: 'private/nested'

@@ -39,6 +39,10 @@ module.exports = {
         })(req, res, next);
     },
 
+    addPost: function(req, res, next) {
+        req.logout();
+    },
+
     logout: function(req, res) {
         req.logout();
         res.send(200);

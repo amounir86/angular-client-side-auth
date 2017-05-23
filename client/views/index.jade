@@ -4,7 +4,15 @@ html(lang='en', data-ng-app='angular-client-side-auth')
         meta(charset='utf-8')
         base(href='/')
         title Angular Auth Example
+
+        // Material Design Lite
+        link(rel="stylesheet", href="https://fonts.googleapis.com/icon?family=Material+Icons")
+        link(rel="stylesheet", href="https://code.getmdl.io/1.1.3/material.blue_grey-orange.min.css")
+        script(src="https://code.getmdl.io/1.1.3/material.min.js")
+
+        link(rel='stylesheet', href='/css/main.css')
         link(rel='stylesheet', href='/css/app.css')
+
         link(href="/components/bootstrap/dist/css/bootstrap.min.css", rel="stylesheet")
         link(href="/components/font-awesome/css/font-awesome.min.css", rel="stylesheet")
 
@@ -13,6 +21,19 @@ html(lang='en', data-ng-app='angular-client-side-auth')
             if (window.location.href.indexOf('#_=_') > 0) {
                 window.location = window.location.href.replace(/#.*/, '');
             }
+
+        script(src='https://www.gstatic.com/firebasejs/3.6.7/firebase.js')
+        script(type="text/javascript").
+            // Initialize Firebase
+            var config = {
+              apiKey: "AIzaSyBleiwkbTGboGYbXPeJrI0_4xNZh8g6GxM",
+              authDomain: "wod-bud.firebaseapp.com",
+              databaseURL: "https://wod-bud.firebaseio.com",
+              storageBucket: "wod-bud.appspot.com",
+              messagingSenderId: "666308033451"
+            };
+            firebase.initializeApp(config);
+
     body(data-ng-cloak)
 
         .navbar(data-ng-controller="NavCtrl")

@@ -42,6 +42,29 @@ angular.module('angular-client-side-auth')
 }]);
 
 angular.module('angular-client-side-auth')
+.controller('addPostCtrl',
+['$rootScope', '$scope', '$location', '$window', 'Auth', function($rootScope, $scope, $location, $window, Auth) {
+
+    $scope.message = "Message"
+    $scope.title = "Title";
+    $scope.addPost = function(req, res) {
+        Auth.addPost({
+                username: $scope.username,
+                password: $scope.password,
+                rememberme: $scope.rememberme,
+                message: $scope.message,
+                title: $scope.title
+            },
+            function(res) {
+                $location.path('/');
+            },
+            function(err) {
+                $rootScope.error = "Failed to addPost";
+            });
+    };
+}]);
+
+angular.module('angular-client-side-auth')
 .controller('RegisterCtrl',
 ['$rootScope', '$scope', '$location', 'Auth', function($rootScope, $scope, $location, Auth) {
     $scope.role = Auth.userRoles.user;

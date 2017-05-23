@@ -14,6 +14,8 @@ var express =           require('express')
 var app = module.exports = express();
 
 app.set('views', __dirname + '/client/views');
+//app.engine('html', require('ejs').renderFile);
+//app.set('view engine', 'html');
 app.set('view engine', 'jade');
 app.use(morgan('dev'));
 app.use(bodyParser.urlencoded({extended: true}));
@@ -41,7 +43,7 @@ app.use(passport.session());
 passport.use(User.localStrategy);
 //passport.use(User.twitterStrategy());   Uncomment this line if you don't want to enable login via Twitter
 //passport.use(User.facebookStrategy());  Uncomment this line if you don't want to enable login via Facebook
-//passport.use(User.googleStrategy());    Uncomment this line if you don't want to enable login via Google
+passport.use(User.googleStrategy());
 //passport.use(User.linkedInStrategy());  Uncomment this line if you don't want to enable login via LinkedIn
 
 passport.serializeUser(User.serializeUser);
